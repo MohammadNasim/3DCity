@@ -28,7 +28,7 @@
     }
 
     .control.rotation {
-      top: 75px;
+      top: 45px;
     }
 
     .control.zoom {
@@ -82,10 +82,10 @@
 <script>
   const osmb = new OSMBuildings({
     container: 'map',
-    zoom: 16,
+    zoom: 18,
     minZoom: 16,
-    maxZoom: 19,
-    position: { latitude: 52.52000, longitude: 13.41000 },
+    maxZoom: 21,
+    position: { latitude: 52.520470, longitude: 13.409356},
     state: true, // stores map position/rotation in url
     attribution: '© 3D <a href="https://osmbuildings.org/copyright/">OSM Buildings</a>'
   });
@@ -99,7 +99,7 @@
 
   osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
 
-  osmb.addOBJ(`${location.protocol}//${location.hostname}/${location.pathname}../data/Fernsehturm.obj`, { latitude:52.52000, longitude:13.41000 }, { id:'Fernsehturm', scale:2, color:'#ff0000', altitude:0, rotation:51 });
+  osmb.addOBJ(`${location.protocol}//${location.hostname}/${location.pathname}../data/Fernsehturm.obj`, { latitude: 52.520470, longitude: 13.409356}, { id:'Fernsehturm', scale:2, color:'#ff0000', altitude:0, rotation:75 });
 
 
   //***************************************************************************
