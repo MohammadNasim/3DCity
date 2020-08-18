@@ -1,84 +1,155 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>OSM Buildings</title>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-  <meta property="title" content="OSM Buildings"/>
-  <meta property="description" content="OSM Buildings 3D city models and viewers"/>
-  <meta property="keywords" content="OSM Buildings, OSMBuildings, OSM-Buildings, 3D Buildings, Extruded Buildings, Building Geometry, 3D Massing, Vector Tiles, 3D Architecture, OSM-3D, 3D, VR, Virtual Reality, DEM, DSM, Building Heights, Elevation Model, LIDAR, Point Cloud, Building, Buildings, CityGML, City model, Virtual city models, Leaflet, LeafletJS, Leaflet.js, OpenLayers, Jan Marsch, Berlin, Terrain, Map, Maps, Mapbox, MapboxGL, Cesium, CartoDB, CARTO, Mapzen, Perspective, Polygons, BIM, OSM, OpenStreetMap, JS, JavaScript, Library, WebGL, Example, Examples, Indoor, Layer, BuildingLayer, BuildingsLayer, Footprint, Coordinates, Geometry, JSON, GeoJSON, Height, Extract, node, nodeJS, node.js, PostGIS, Geo, GPS, GIS, Visualization, Latitude, Longitude, Mercator, Projection, Panning, Zooming, API"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <link rel="icon" type="image/png" href="https://osmbuildings.org/favicon.png"/>
-  <link href="https://cdn.osmbuildings.org/4.1.1/OSMBuildings.css" rel="stylesheet"/>
-  <script src="https://cdn.osmbuildings.org/4.1.1/OSMBuildings.js"></script>
-  <link rel="stylesheet" href="https://osmbuildings.org/css/style.css"/>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
-  html, body {
-    overflow: hidden;
-  }
-
-  #map {
-    width: 100%;
-    height: 100%;
-  }
-
-  .osmb-attribution {
-    bottom: 30px !important;
-  }
-
-  @media screen and (max-width: 640px) {
-    .osmb-attribution {
-      display: none;
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
     }
-  }
 
-	.download {
-		max-width: 250px;
-		position: absolute;
-		left: 20px;
-		bottom: 48px;
-		background: rgba(25,100,125,0.8); /* Old browsers */
-		background: linear-gradient(to bottom, rgba(125,200,225,0.8) 0%,rgba(25,100,125,0.8) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-//	border-radius: 10px;
-		border: 0px solid rgba(0,0,0,0.1);
-		box-shadow: 0 0 15px rgba(0,0,0,0.4);
-		text-align: center;
-		padding: 12px 16px;
-		cursor: pointer;
-	}
+    #map {
+      width: 100%;
+      height: 100%;
+    }
 
-	.download h1 {
-		margin: 0 0 0px 0;
-		font-size: 24px;
-		color: #ffffff;
-	}
+    .control {
+      position: absolute;
+      left: 0;
+      z-index: 1000;
+    }
+
+    .control.tilt {
+      top: 0;
+    }
+
+    .control.rotation {
+      top: 45px;
+    }
+
+    .control.zoom {
+      top: 90px;
+    }
+
+    .control.zoom button{
+      font-weight: normal;
+    }
+
+    .control button {
+      width: 30px;
+      height: 30px;
+      margin: 15px 0 0 15px;
+      border: 1px solid #999999;
+      background: #ffffff;
+      opacity: 0.6;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #666666;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .control button:hover {
+      opacity: 1;
+      cursor: pointer;
+    }
   </style>
-  <script src="https://osmbuildings.org/js/lib/jquery-3.2.1.min.js"></script>
-  <script src="https://osmbuildings.org/js/Events.js"></script>
-  <script src="https://osmbuildings.org/js/Search.js"></script>
-  <script src="https://osmbuildings.org/js/Params.js"></script>
-  <script src="https://osmbuildings.org/js/index.js"></script>
-  <script src="https://osmbuildings.org/js/map.js"></script>
+  <link rel="stylesheet" href="OSMBuildings.css">
+  <script src="OSMBuildings.js"></script>
 </head>
 
-<body class="fullscreen">
-
-<header>
-
-</header>
+<body>
 <div id="map"></div>
 
-
-<div id="sidebar">
-	<div id="sidebar-scroll">
-		<ul id="search-results"></ul>
-	</div>
+<div class="control tilt">
+  <button class="dec">&#8601;</button>
+  <button class="inc">&#8599;</button>
 </div>
 
-<form id="search">
-	<input type="text" autocorrect="off" placeholder="Search">
-	<button id="search-trigger-button"type="button" class="icon-button fa-icon" title="Start search">&#xf002;</button><span class="vr"></span><button id="sidebar-toggle-button" type="button" class="icon-button fa-icon" title="Toggle sidebar">&#xf0c9;</button>
-</form>
+<div class="control rotation">
+  <button class="inc">&#8630;</button>
+  <button class="dec">&#8631;</button>
+</div>
+
+<div class="control zoom">
+  <button class="dec">-</button>
+  <button class="inc">+</button>
+</div>
+
+<script>
+  const osmb = new OSMBuildings({
+    container: 'map',
+    zoom: 16,
+    minZoom: 16,
+    maxZoom: 19,
+    position: { latitude: 52.52000, longitude: 13.41000 },
+    state: true, // stores map position/rotation in url
+    attribution: '© 3D <a href="https://osmbuildings.org/copyright/">OSM Buildings</a>'
+  });
+
+  osmb.addMapTiles(
+    'https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w',
+    {
+      attribution: '© Data <a href="https://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="https://mapbox.com/">Mapbox</a>'
+    }
+  );
+
+  osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
+
+  osmb.addOBJ(`${location.protocol}//${location.hostname}/${location.pathname}../data/Fernsehturm.obj`, { latitude:52.52000, longitude:13.41000 }, { id:'Fernsehturm', scale:2, color:'#ff0000', altitude:0, rotation:51 });
 
 
+  //***************************************************************************
+
+  // on pointer up
+  osmb.on('pointerup', e => {
+    // if none, remove any previous selection and return
+    if (!e.features) {
+      osmb.highlight(feature => {});
+      return;
+    }
+
+    // store id's from seleted items...
+    const featureIDList = e.features.map(feature => feature.id);
+
+    // ...then is is faster: set highlight color for matching features
+    osmb.highlight(feature => {
+      if (featureIDList.indexOf(feature.id) > -1) {
+        return '#ffffff';
+      }
+    });
+  });
+
+  //***************************************************************************
+
+  const controlButtons = document.querySelectorAll('.control button');
+
+  controlButtons.forEach(button => {
+    button.addEventListener('click', e => {
+      const parentClassList = button.parentNode.classList;
+      const direction = button.classList.contains('inc') ? 1 : -1;
+      let increment, property;
+
+      if (parentClassList.contains('tilt')) {
+        property = 'Tilt';
+        increment = direction*10;
+      }
+      if (parentClassList.contains('rotation')) {
+        property = 'Rotation';
+        increment = direction*10;
+      }
+      if (parentClassList.contains('zoom')) {
+        property = 'Zoom';
+        increment = direction*1;
+      }
+      if (property) {
+        osmb['set'+ property](osmb['get'+ property]()+increment);
+      }
+    });
+  });
+</script>
 </body>
 </html>
